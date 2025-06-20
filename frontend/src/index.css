@@ -1,0 +1,13 @@
+body {
+  background: #10131a !important;
+  color: #fff;
+  min-height: 100vh;
+  margin: 0;
+  font-family: 'Roboto', Arial, sans-serif;
+  position: relative;
+}
+
+#root {
+  position: relative;
+  z-index: 1;
+}
