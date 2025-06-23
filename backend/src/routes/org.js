@@ -66,7 +66,7 @@ router.post('/:id/employees', async (req, res) => {
   const { email } = req.body;
   if (!email) return res.status(400).json({ message: 'Email обязателен' });
   const org = await Organization.findById(req.params.id);
-  if (!org) return res.status(404).json({ message: 'Организац��я не найдена' });
+  if (!org) return res.status(404).json({ message: 'Организация не найдена' });
   if (org.employees.includes(email)) return res.status(400).json({ message: 'Сотрудник уже добавлен' });
 
   // Генерируем одноразовый пароль

@@ -161,12 +161,49 @@ router.post('/login', [
     }
 });
 
+// Проверка email/пароля администратора перед 2FA
+router.post('/admin/verify', [
+    body('email').isEmail().withMessage('Введите корректный email'),
+    body('password').notEmpty().withMessage('Введите пароль')
+], async (req, res) => {
+    console.log('Получен запрос на проверку админа:', { email: req.body.email });
+    try {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            console.log('Ошибки валидации:', errors.array());
+            return res.status(400).json({ message: 'Ошибка валидации', errors: errors.array().map(err => err.msg) });
+        }
+        
+        console.log('Ищем пользователя с email:', req.body.email, 'и ролью admin');
+        const user = await User.findOne({ email: req.body.email, role: 'admin' });
+        if (!user) {
+            console.log('Админ не найден для email:', req.body.email);
+            return res.status(400).json({ message: 'Админ не найден' });
+        }
+        
+        console.log('Админ найден, проверяем пароль для пользователя:', user._id);
+        const isMatch = await user.comparePassword(req.body.password);
+        console.log('Результат проверки пароля:', isMatch);
+        
+        if (!isMatch) {
+            console.log('Неверный пароль для админа:', user._id);
+            return res.status(400).json({ message: 'Неверный пароль' });
+        }
+        
+        console.log('Проверка админа успешна для:', user.email);
+        res.json({ message: 'Данные верны', email: user.email });
+    } catch (error) {
+        console.error('Ошибка при проверке админа:', error);
+        res.status(500).json({ message: 'Ошибка сервера', error: process.env.NODE_ENV === 'development' ? error.message : undefined });
+    }
+});
+
 // Генерация секрета и QR-кода для 2FA админа
 router.get('/admin/2fa/setup', async (req, res) => {
     const { email } = req.query;
     if (!email) return res.status(400).json({ message: 'Email обязателен' });
     const user = await User.findOne({ email, role: 'admin' });
-    if (!user) return res.status(404).json({ message: 'Админ ��е найден' });
+    if (!user) return res.status(404).json({ message: 'Админ не найден' });
 
     // Генерируем секрет, если его нет
     if (!user.twoFactorSecret) {
@@ -240,6 +277,32 @@ router.post('/create-test-admin', async (req, res) => {
         res.json({ message: 'Тестовый админ создан', email, password });
     } catch (err) {
         res.status(500).json({ message: 'Ошибка создания тестового админа', error: err.message });
+    }
+});
+
+// Получить данные текущего пользователя
+router.get('/me', require('../middleware/auth'), async (req, res) => {
+    try {
+        const user = await User.findById(req.user._id).populate('organization');
+        
+        // Проверяем, что пользователь вообще существует
+        if (!user) {
+            return res.status(404).json({ message: 'Пользователь не найден' });
+        }
+
+        res.json({
+            _id: user._id,
+            email: user.email,
+            name: user.name,
+            role: user.role,
+            organization: user.organization ? {
+                _id: user.organization._id,
+                name: user.organization.name
+            } : null,
+            mustChangePassword: user.mustChangePassword
+        });
+    } catch (error) {
+        res.status(500).json({ message: 'Ошибка сервера' });
     }
 });
 

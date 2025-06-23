@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const apiMessenger = axios.create({
-  baseURL: 'http://localhost:5000/api/messenger',
+  baseURL: process.env.REACT_APP_API_URL ? `${process.env.REACT_APP_API_URL}/messenger` : '/api/messenger',
   withCredentials: true,
 });
 

@@ -13,7 +13,7 @@ router.get('/', auth, async (req, res) => {
   }
 });
 
-// Получить одну ��оску по id
+// Получить одну доску по id
 router.get('/:id', auth, async (req, res) => {
   try {
     const board = await Board.findOne({ _id: req.params.id, organization: req.user.organization });
@@ -24,7 +24,7 @@ router.get('/:id', auth, async (req, res) => {
   }
 });
 
-// Создать нову�� доску
+// Создать новую доску
 router.post('/', auth, async (req, res) => {
   try {
     const { name, columns, stickers } = req.body;

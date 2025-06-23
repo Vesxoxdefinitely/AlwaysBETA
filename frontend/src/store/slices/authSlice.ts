@@ -16,6 +16,23 @@ const initialState: AuthState = {
     error: null
 };
 
+export const checkAuth = createAsyncThunk(
+    'auth/checkAuth',
+    async (_, { rejectWithValue }) => {
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                throw new Error('No token');
+            }
+            const response = await api.get('/auth/me');
+            return response.data;
+        } catch (error) {
+            localStorage.removeItem('token');
+            return rejectWithValue('Token invalid');
+        }
+    }
+);
+
 export const login = createAsyncThunk(
     'auth/login',
     async (credentials: { email: string; password: string }) => {
@@ -51,6 +68,20 @@ const authSlice = createSlice({
     },
     extraReducers: (builder) => {
         builder
+            .addCase(checkAuth.pending, (state) => {
+                state.loading = true;
+            })
+            .addCase(checkAuth.fulfilled, (state, action) => {
+                state.loading = false;
+                state.user = action.payload;
+                state.token = localStorage.getItem('token');
+            })
+            .addCase(checkAuth.rejected, (state) => {
+                state.loading = false;
+                state.user = null;
+                state.token = null;
+                localStorage.removeItem('token');
+            })
             .addCase(login.pending, (state) => {
                 state.loading = true;
                 state.error = null;

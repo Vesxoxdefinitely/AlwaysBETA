@@ -26,7 +26,7 @@ const upload = multer({
   limits: { fileSize: 5 * 1024 * 1024 }
 });
 
-// Загруз��а изображения
+// Загрузка изображения
 router.post('/upload', upload.single('image'), (req, res) => {
   if (!req.file) return res.status(400).json({ message: 'Файл не загружен' });
   const url = `/uploads/knowledge/${req.file.filename}`;

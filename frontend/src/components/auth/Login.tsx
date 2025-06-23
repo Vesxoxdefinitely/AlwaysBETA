@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -21,6 +21,18 @@ const Login: React.FC = () => {
         password: ''
     });
 
+    const dispatch = useDispatch<AppDispatch>();
+    const navigate = useNavigate();
+    const { loading, error, user } = useSelector((state: RootState) => state.auth);
+
+    // Проверяем, авторизован ли пользователь при загрузке компонента
+    useEffect(() => {
+        const token = localStorage.getItem('token');
+        if (token) {
+            navigate('/tickets');
+        }
+    }, [navigate]);
+
     // Обычный вход для сотрудников
     const [showPasswordModal, setShowPasswordModal] = useState(false);
     const handleSubmit = async (e: React.FormEvent) => {
@@ -36,10 +48,6 @@ const Login: React.FC = () => {
             // Ошибка обрабатывается в slice
         }
     };
-
-    const dispatch = useDispatch<AppDispatch>();
-    const navigate = useNavigate();
-    const { loading, error, user } = useSelector((state: RootState) => state.auth);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFormData({
@@ -73,7 +81,13 @@ const Login: React.FC = () => {
         setAdminError(null);
         setAdminLoading(true);
         try {
-            // Получаем QR, если 2FA не настроена
+            // Сначала проверяем email и пароль
+            await api.post('/auth/admin/verify', {
+                email: adminFormData.email,
+                password: adminFormData.password
+            });
+            
+            // Если проверка прошла успешно, получаем QR-код
             const resp = await api.get('/auth/admin/2fa/setup', { params: { email: adminFormData.email } });
             if (resp.data && resp.data.qr) {
                 setQrData(resp.data.qr);

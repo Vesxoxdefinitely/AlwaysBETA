@@ -1,5 +1,14 @@
-const { startImap } = require('./imap/imapClient');
-startImap();
+// Глобальные обработчики необработанных ошибок
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('НЕОБРАБОТАННЫЙ PROMISE REJECTION:', reason);
+});
+
+// process.on('uncaughtException', (err, origin) => {
+//   console.error('НЕПЕРЕХВАЧЕННОЕ ИСКЛЮЧЕНИЕ:', err);
+// });
+
+// const { startImap } = require('./imap/imapClient');
+// startImap();
 
 const express = require('express');
 const cors = require('cors');
@@ -7,11 +16,20 @@ const app = express();
 
 // Разрешить CORS для фронта на 3001 и 3000 портах
 app.use(cors({
-  origin: ['http://localhost:3000', 'http://localhost:3001'],
+  origin: [
+    'http://localhost:3000', 
+    'http://localhost:3001',
+    'http://alwayshelper.ru',
+    'https://alwayshelper.ru',
+    'http://www.alwayshelper.ru',
+    'https://www.alwayshelper.ru'
+  ],
   credentials: true
 }));
 const mongoose = require('mongoose');
 const path = require('path');
+
+// Загружаем .env только в development режиме
 require('dotenv').config();
 
 // Проверка необходимых переменных окружения
@@ -36,12 +54,25 @@ app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
 // Middleware
 app.use(cors({
-    origin: ['http://localhost:3000', 'http://localhost:3001'],
+    origin: [
+        'http://localhost:3000', 
+        'http://localhost:3001',
+        'http://alwayshelper.ru',
+        'https://alwayshelper.ru',
+        'http://www.alwayshelper.ru',
+        'https://www.alwayshelper.ru'
+    ],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']
 }));
 app.use(express.json());
+
+// Добавляю middleware для явного указания кодировки JSON
+app.use((req, res, next) => {
+  res.setHeader('Content-Type', 'application/json; charset=utf-8');
+  next();
+});
 
 // Подключение к MongoDB
 mongoose.connect(process.env.MONGODB_URI, {
@@ -86,8 +117,13 @@ app.use((err, req, res, next) => {
     });
 });
 
+app.use((req, res, next) => {
+  console.log('Пришел запрос:', req.method, req.originalUrl, 'от', req.headers.origin);
+  next();
+});
+
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
     console.log(`Сервер запущен на порту ${PORT}`);
     console.log('Режим:', process.env.NODE_ENV);
 }); 

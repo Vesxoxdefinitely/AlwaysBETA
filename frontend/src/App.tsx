@@ -5,8 +5,9 @@ import { Provider } from 'react-redux';
 import CssBaseline from '@mui/material/CssBaseline';
 import { store } from './store';
 import Login from './components/auth/Login';
-import Register from './components/auth/Register';
+// import Register from './components/auth/Register';
 import Layout from './components/layout/Layout';
+import ProtectedRoute from './components/auth/ProtectedRoute';
 import TicketList from './components/tickets/TicketList';
 import TicketDetails from './components/tickets/TicketDetails';
 import CreateTicket from './components/tickets/CreateTicket';
@@ -115,6 +116,13 @@ function App() {
         handleScroll();
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
+
+    // Функция для проверки аутентификации
+    const isAuthenticated = () => {
+        const token = localStorage.getItem('token');
+        return !!token;
+    };
+
     return (
         <Provider store={store}>
             <ThemeProvider theme={theme}>
@@ -123,9 +131,17 @@ function App() {
                 <Router>
                     <Routes>
                         <Route path="/login" element={<Login />} />
-                        <Route path="/register" element={<Register />} />
-                        <Route path="/" element={<Layout />}>
-                            <Route index element={<Navigate to="/tickets" replace />} />
+                        {/* <Route path="/register" element={<Register />} /> */}
+                        <Route path="/" element={
+                            <ProtectedRoute>
+                                <Layout />
+                            </ProtectedRoute>
+                        }>
+                            <Route index element={
+                                isAuthenticated() ? 
+                                <Navigate to="/tickets" replace /> : 
+                                <Navigate to="/login" replace />
+                            } />
                             <Route path="bug-tracker" element={<TaskList />} />
                             <Route path="bug-tracker/create" element={<CreateTask />} />
                             <Route path="bug-tracker/:id" element={<TaskDetails />} />

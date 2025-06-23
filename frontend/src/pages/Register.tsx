@@ -20,6 +20,8 @@ const Register = () => {
   });
   const [error, setError] = useState('');
 
+  const API_URL = process.env.REACT_APP_API_URL || '/api';
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
       ...formData,
@@ -30,7 +32,7 @@ const Register = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://localhost:5000/api/auth/register', formData);
+      const response = await axios.post(`${API_URL}/auth/register`, formData);
       localStorage.setItem('token', response.data.token);
       navigate('/');
     } catch (err: any) {

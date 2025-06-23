@@ -62,6 +62,8 @@ const Messenger: React.FC = () => {
   const navigate = useNavigate();
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  console.log('Messenger: baseURL для API:', (apiMessenger && apiMessenger.defaults && apiMessenger.defaults.baseURL) ? apiMessenger.defaults.baseURL : 'нет baseURL');
+
   // Поиск сотрудников
   const handleUserSearch = (query: string) => {
     setUserSearchQuery(query);

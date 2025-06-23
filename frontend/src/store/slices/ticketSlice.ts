@@ -16,12 +16,14 @@ const initialState: TicketState = {
     error: null
 };
 
+const API_URL = process.env.REACT_APP_API_URL || '/api';
+
 // Async thunks
 export const fetchTickets = createAsyncThunk(
     'tickets/fetchTickets',
     async () => {
         const token = localStorage.getItem('token');
-        const response = await axios.get('http://localhost:5000/api/tickets', {
+        const response = await axios.get(`${API_URL}/tickets`, {
             headers: { Authorization: `Bearer ${token}` }
         });
         return response.data;
@@ -32,7 +34,7 @@ export const fetchTicketById = createAsyncThunk(
     'tickets/fetchTicketById',
     async (id: string) => {
         const token = localStorage.getItem('token');
-        const response = await axios.get(`http://localhost:5000/api/tickets/${id}`, {
+        const response = await axios.get(`${API_URL}/tickets/${id}`, {
             headers: { Authorization: `Bearer ${token}` }
         });
         return response.data;
@@ -43,7 +45,7 @@ export const createTicket = createAsyncThunk(
     'tickets/createTicket',
     async (ticketData: Partial<Ticket>) => {
         const token = localStorage.getItem('token');
-        const response = await axios.post('http://localhost:5000/api/tickets', ticketData, {
+        const response = await axios.post(`${API_URL}/tickets`, ticketData, {
             headers: { Authorization: `Bearer ${token}` }
         });
         return response.data;
@@ -54,7 +56,7 @@ export const updateTicket = createAsyncThunk(
     'tickets/updateTicket',
     async ({ id, data }: { id: string; data: Partial<Ticket> }) => {
         const token = localStorage.getItem('token');
-        const response = await axios.put(`http://localhost:5000/api/tickets/${id}`, data, {
+        const response = await axios.put(`${API_URL}/tickets/${id}`, data, {
             headers: { Authorization: `Bearer ${token}` }
         });
         return response.data;
@@ -66,7 +68,7 @@ export const addComment = createAsyncThunk(
     async ({ ticketId, text }: { ticketId: string; text: string }) => {
         const token = localStorage.getItem('token');
         const response = await axios.post(
-            `http://localhost:5000/api/tickets/${ticketId}/comments`,
+            `${API_URL}/tickets/${ticketId}/comments`,
             { text },
             { headers: { Authorization: `Bearer ${token}` } }
         );

@@ -16,7 +16,7 @@ import { AppDispatch, RootState } from '../store';
 const Login = () => {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
-  const { loading, error } = useSelector((state: RootState) => state.auth);
+  const { loading, error, user } = useSelector((state: RootState) => state.auth);
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -27,6 +27,16 @@ const Login = () => {
       dispatch(clearError());
     };
   }, [dispatch]);
+
+  useEffect(() => {
+    if (user) {
+      if (user.role === 'admin') {
+        navigate('/admin-setup');
+      } else {
+        navigate('/');
+      }
+    }
+  }, [user, navigate]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -39,7 +49,6 @@ const Login = () => {
     e.preventDefault();
     try {
       await dispatch(login(formData)).unwrap();
-      navigate('/');
     } catch (err) {
       // Ошибка обрабатывается в slice
     }

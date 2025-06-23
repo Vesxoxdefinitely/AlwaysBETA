@@ -38,7 +38,7 @@ router.post('/channels/:id/messages', auth, async (req, res) => {
   res.status(201).json(message);
 });
 
-// Пол��чить тред (ответы) к сообщению
+// Получить тред (ответы) к сообщению
 router.get('/messages/:id/replies', async (req, res) => {
   const msg = await Message.findById(req.params.id);
   res.json(msg ? msg.replies : []);
@@ -91,3 +91,4 @@ router.post('/dm', async (req, res) => {
 });
 
 module.exports = router;
+console.log('API URL:', process.env.REACT_APP_API_URL);

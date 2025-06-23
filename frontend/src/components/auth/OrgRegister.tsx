@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import EmployeeAdder from '../org/EmployeeAdder';
 
-const API_URL = 'http://localhost:5000/api/org/register';
+const API_URL = process.env.REACT_APP_API_URL || '/api';
 
 export default function OrgRegister() {
   const [orgName, setOrgName] = useState('');
@@ -19,7 +19,7 @@ export default function OrgRegister() {
     setSuccess('');
     setLoading(true);
     try {
-      const res = await axios.post(API_URL, {
+      const res = await axios.post(`${API_URL}/org/register`, {
         orgName,
         adminEmail
       });

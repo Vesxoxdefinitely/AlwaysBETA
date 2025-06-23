@@ -4,7 +4,7 @@ const Ticket = require('../models/Ticket');
 const auth = require('../middleware/auth');
 const { body, validationResult } = require('express-validator');
 
-// GET /api/tickets - Получить спи��ок тикетов с фильтрацией
+// GET /api/tickets - Получить список тикетов с фильтрацией
 router.get('/', auth, async (req, res) => {
     try {
         const query = { organization: req.user.organization };
